@@ -8,6 +8,28 @@ from datetime import datetime
 # Third argument pathToFile
 
 
+def calculate_monthly_averages(path):
+    with open(path, 'r') as file:
+        next(file)  # Skip the header line
+        max_temperatures = []
+        min_temperatures = []
+        humidities = []
+        for line in file:
+            data = line.strip().split(',')
+            if len(data) > 1:
+                date = datetime.strptime(data[0], '%Y-%m-%d')
+                max_temperatures.append(float(data[1]))
+                min_temperatures.append(float(data[3]))
+                humidities.append(float(data[7]))
+
+        # Calculate average highest temperature, average lowest temperature, and average humidity
+        avg_highest_temp = sum(max_temperatures) / len(max_temperatures)
+        avg_lowest_temp = sum(min_temperatures) / len(min_temperatures)
+        avg_humidity = sum(humidities) / len(humidities)
+
+        return avg_highest_temp, avg_lowest_temp, avg_humidity
+
+
 def max_min_humid_temp_of_year(files):
     max_temp = float('-inf')
     min_temp = float('inf')
@@ -102,6 +124,11 @@ try:
     filtered_files = filter_files(folder_path, year, month)
     if (sys.argv[1] == "-e"):
         max_min_humid_temp_of_year(filtered_files)
+    elif (sys.argv[1] == "-a"):
+        avg_highest_temp, avg_lowest_temp, avg_humidity = calculate_monthly_averages(filtered_files[0])
+        print(f"Average highest temperature: {avg_highest_temp:.2f}°C")
+        print(f"Average lowest temperature: {avg_lowest_temp:.2f}°C")
+        print(f"Average humidity: {avg_humidity:.2f}%")
 
 except IndexError:
     print("Please provide all arguments")
