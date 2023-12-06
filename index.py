@@ -6,6 +6,41 @@ from datetime import datetime
 # First argument -e -a -c
 # Second argument  year/month
 # Third argument pathToFile
+positive_color = "\033[1;32m"
+negative_color = "\033[1;31m"
+positive_number = "+"
+negative_number = "-"
+
+
+def draw_temperature_chart(path):
+    with open(path, 'r') as file:
+        next(file)  # Skip the header line
+        for line in file:
+            data = line.strip().split(',')
+            if len(data) > 1:
+                date = datetime.strptime(data[0], '%Y-%m-%d')
+                day = date.day
+                highest_temp = int(data[1])
+                lowest_temp = int(data[3])
+                print(f"\033[0mDay {day}:")
+                print("Highest Temperature:", end=" ")
+                if highest_temp > 0:
+                    print(positive_color + positive_number *
+                          highest_temp, flush=True)
+                else:
+                    print(negative_color + negative_number *
+                          abs(highest_temp), flush=True)
+                print(f"({data[1]}°C)")
+
+                print("\033[0mLowest Temperature: ", end=" ")
+                if lowest_temp > 0:
+                    print(positive_color + positive_number *
+                          lowest_temp, flush=True)
+                else:
+                    print(negative_color + negative_number *
+                          abs(lowest_temp), flush=True)
+                print(f"({data[3]}°C)")
+                print()
 
 
 def calculate_monthly_averages(path):
@@ -27,7 +62,9 @@ def calculate_monthly_averages(path):
         avg_lowest_temp = sum(min_temperatures) / len(min_temperatures)
         avg_humidity = sum(humidities) / len(humidities)
 
-        return avg_highest_temp, avg_lowest_temp, avg_humidity
+        print(f"Average highest temperature: {avg_highest_temp:.2f}°C")
+        print(f"Average lowest temperature: {avg_lowest_temp:.2f}°C")
+        print(f"Average humidity: {avg_humidity:.2f}%")
 
 
 def max_min_humid_temp_of_year(files):
@@ -125,10 +162,9 @@ try:
     if (sys.argv[1] == "-e"):
         max_min_humid_temp_of_year(filtered_files)
     elif (sys.argv[1] == "-a"):
-        avg_highest_temp, avg_lowest_temp, avg_humidity = calculate_monthly_averages(filtered_files[0])
-        print(f"Average highest temperature: {avg_highest_temp:.2f}°C")
-        print(f"Average lowest temperature: {avg_lowest_temp:.2f}°C")
-        print(f"Average humidity: {avg_humidity:.2f}%")
+        calculate_monthly_averages(filtered_files[0])
+    elif (sys.argv[1] == "-c"):
+        draw_temperature_chart(filtered_files[0])
 
 except IndexError:
     print("Please provide all arguments")
